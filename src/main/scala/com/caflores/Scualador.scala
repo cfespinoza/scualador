@@ -1,11 +1,14 @@
 package com.caflores
 
-import com.ntic.to_check.{AnalisisExploratorio, Analizador, Utilidades, Contribuyente}
+import com.ntic.to_check.{AnalisisExploratorio, Analizador, Contribuyente, Utilidades}
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.Logger
+import org.json4s.JsonAST.JObject
+import org.json4s.native.JsonMethods._
+import org.json4s.JsonDSL._
 import org.slf4j.LoggerFactory
 
-import java.io.{File, FileOutputStream, PrintStream}
+import java.io.{File, FileOutputStream, PrintStream, PrintWriter}
 import scala.io.Source.fromFile
 import scala.util.{Failure, Success, Try}
 
@@ -19,11 +22,6 @@ object Scualador extends App {
   val logger = Logger(LoggerFactory.getLogger(scualador.getString("app-name")))
   logger.info("=> Logger cargado")
   val dataset = Utilidades.readFile(scualador.getString("dataset-csv"))
-
-
-  def parseDistribucion(d: Double): Double =
-    BigDecimal(if (d < 1) d else d / 100).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
-
   // Ejercicio 1
   val totalDeRegistros: Double = Try({
     AnalisisExploratorio.totalDeRegistros(dataset)
@@ -31,7 +29,6 @@ object Scualador extends App {
     case Success(response) => if (responses.getInt("totalDeRegistros") == response) 0.5 else 0
     case Failure(_) => 0
   }
-
   // Ejercicio 2
   val calculaEdadMedia: Double = Try({
     AnalisisExploratorio.calculaEdadMedia(dataset)
@@ -44,7 +41,6 @@ object Scualador extends App {
       else 0
     case Failure(_) => 0
   }
-
   // Ejercicio 3
   val calculaEdadMediaNoZeros: Double = Try({
     AnalisisExploratorio.calculaEdadMediaNoZeros(dataset)
@@ -57,7 +53,6 @@ object Scualador extends App {
       else 0
     case Failure(_) => 0
   }
-
   // Ejercicio 4
   val paisesOrigenUnicos: Double = Try({
     AnalisisExploratorio.paisesOrigenUnicos(dataset)
@@ -69,7 +64,6 @@ object Scualador extends App {
       else 0
     case Failure(_) => 0
   }
-
   // Ejercicio 5
   val distribucionPorGeneros: Double = Try({
     AnalisisExploratorio.distribucionPorGeneros(dataset)
@@ -85,7 +79,6 @@ object Scualador extends App {
       else 0
     case Failure(_) => 0
   }
-
   // Ejercicio 6
   val trabajoMejorRemunerado: Double = Try({
     AnalisisExploratorio.trabajoMejorRemunerado(dataset)
@@ -96,7 +89,6 @@ object Scualador extends App {
       else 0
     case Failure(_) => 0
   }
-
   // Ejercicio 7
   val aniosEstudiosMedio: Double = Try({
     AnalisisExploratorio.aniosEstudiosMedio(dataset)
@@ -107,7 +99,6 @@ object Scualador extends App {
       else 0
     case Failure(_) => 0
   }
-
   // Ejercicio 8
   val applyContribuyente: Double = Try({
     Contribuyente()
@@ -133,7 +124,6 @@ object Scualador extends App {
       else 0
     case Failure(_) => 0
   }
-
   // Ejercicio 9
   val imprimeDatos: Double = Try({
     Console.withOut(new PrintStream(new FileOutputStream(outputFileImprimeDatos))) {
@@ -145,14 +135,12 @@ object Scualador extends App {
     else 0
     case Failure(exception) => 0
   }
-
   // Ejercicio 10
   val analizador: Double = AnalisisExploratorio match {
     case x: Analizador => 0.5
     case x: App => 0
     case _ => 0
   }
-
   // Ejercicio 11
   val imprimeContribuyentes: Double = Try({
     Console.withOut(new PrintStream(new FileOutputStream(outputFileImprimeContribuyentes))) {
@@ -164,18 +152,10 @@ object Scualador extends App {
     else 0
     case Failure(_) => 0
   }
+  val nota = totalDeRegistros + calculaEdadMedia + calculaEdadMediaNoZeros + paisesOrigenUnicos + distribucionPorGeneros + trabajoMejorRemunerado + aniosEstudiosMedio + applyContribuyente + imprimeDatos + analizador + imprimeContribuyentes
 
-
-  def getListOfFiles(dir: String): Seq[String] = {
-    val d = new File(dir)
-    if (d.exists && d.isDirectory) {
-      val files = d.listFiles()
-      logger.info(s"Ficheros entregados: ${files.length}")
-      logger.info(s"Ficheros con formato correcto (zip): ${files.count(_.getName.contains("zip"))}")
-      logger.info(s"Ficheros con formato incorrecto: ${files.count(!_.getName.contains("zip"))}")
-    }
-    Seq.empty
-  }
+  def parseDistribucion(d: Double): Double =
+    BigDecimal(if (d < 1) d else d / 100).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
 
   logger.debug(s"totalDeRegistros: ${totalDeRegistros}")
   logger.debug(s"calculaEdadMedia: ${calculaEdadMedia}")
@@ -188,6 +168,22 @@ object Scualador extends App {
   logger.debug(s"imprimeDatos: ${imprimeDatos}")
   logger.debug(s"analizador: ${analizador}")
   logger.debug(s"imprimeContribuyentes: ${imprimeContribuyentes}")
-  val nota = totalDeRegistros+ calculaEdadMedia+ calculaEdadMediaNoZeros+ paisesOrigenUnicos+ distribucionPorGeneros+ trabajoMejorRemunerado+ aniosEstudiosMedio+ applyContribuyente+ imprimeDatos+ analizador+ imprimeContribuyentes
+  val notas: JObject = (
+    ("totalDeRegistros" -> totalDeRegistros) ~
+    ("calculaEdadMedia" -> calculaEdadMedia) ~
+    ("calculaEdadMediaNoZeros" -> calculaEdadMediaNoZeros) ~
+    ("paisesOrigenUnicos" -> paisesOrigenUnicos) ~
+    ("distribucionPorGeneros" -> distribucionPorGeneros) ~
+    ("trabajoMejorRemunerado" -> trabajoMejorRemunerado) ~
+    ("aniosEstudiosMedio" -> aniosEstudiosMedio) ~
+    ("applyContribuyente" -> applyContribuyente) ~
+    ("imprimeDatos" -> imprimeDatos) ~
+    ("analizador" -> analizador) ~
+    ("imprimeContribuyentes" -> imprimeContribuyentes) ~
+    ("nota" -> nota)
+  )
+  val notasPW = new PrintWriter(new File(s"${scualador.getString("notas-dir")}/${scualador.getString("alumno")}"))
+  notasPW.write(compact(render(notas)))
+  notasPW.close()
   logger.info(s"Nota Final: ${nota}")
 }
