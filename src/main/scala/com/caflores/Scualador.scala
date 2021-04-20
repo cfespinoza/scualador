@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory
 
 import java.io.{File, FileOutputStream, PrintStream, PrintWriter}
 import scala.io.Source.fromFile
+import scala.reflect.runtime.universe._
+import scala.reflect.runtime.universe.{typeOf, TypeTag, typeTag, TypeRef}
 import scala.util.{Failure, Success, Try}
 
 
@@ -100,43 +102,33 @@ object Scualador extends App {
     case Failure(_) => 0
   }
   // Ejercicio 8
+
   val applyContribuyente: Double = Try({
-    Contribuyente()
+    //    Contribuyente.apply()
+    val contribuyenteFacade = typeOf[Contribuyente.type]
+    val applyMethod = contribuyenteFacade.member(TermName("apply")).asMethod
+    (applyMethod.returnType.toString == "com.ntic.to_check.Contribuyente") && applyMethod.asMethod.info.paramss.head.isEmpty
   }) match {
-    case Success(c: Contribuyente) =>
-      val desconocido = "desconocido"
-      val negativo = -1
-      if (c.income == desconocido
-        && c.age == negativo
-        && c.workclass == desconocido
-        && c.education == desconocido
-        && c.educationNum == negativo
-        && c.maritalStatus == desconocido
-        && c.occupation == desconocido
-        && c.relationship == desconocido
-        && c.race == desconocido
-        && c.sex == desconocido
-        && c.capitalGain == negativo
-        && c.capitalLoss == negativo
-        && c.hoursPerWeek == negativo
-        && c.nativeCountry == desconocido)
+    case Success(b) =>
+      if (b)
         1
       else 0
     case Failure(_) => 0
   }
   // Ejercicio 9
   val imprimeDatos: Double = Try({
-    Console.withOut(new PrintStream(new FileOutputStream(outputFileImprimeDatos))) {
-      Contribuyente.imprimeDatos(Contribuyente())
-    }
+    val contribuyenteFacade = typeOf[Contribuyente.type]
+    val imprimeDatosMethod = contribuyenteFacade.member(TermName("imprimeDatos")).asMethod
+    (imprimeDatosMethod.asMethod.info.paramss.head.size == 1) && (imprimeDatosMethod.info.paramss.head.head.info.toString == "Seq[com.ntic.to_check.Contribuyente]")
   }) match {
-    case Success(_) => if (fromFile(outputFileImprimeDatos).getLines().forall(_ == responses.getString("imprimeDatos")))
-      1
-    else 0
+    case Success(b) =>
+      if (b)
+        1
+      else 0
     case Failure(exception) => 0
   }
   // Ejercicio 10
-  val analizador: Double = AnalisisExploratorio match {
+  val analizador: Double = typeOf[AnalisisExploratorio.type] match {
     case x: Analizador => 0.5
     case x: App => 0
     case _ => 0
@@ -144,7 +136,7 @@ object Scualador extends App {
   // Ejercicio 11
   val imprimeContribuyentes: Double = Try({
     Console.withOut(new PrintStream(new FileOutputStream(outputFileImprimeContribuyentes))) {
-      AnalisisExploratorio.imprimeContribuyentes(Seq(Contribuyente(), Contribuyente()))
+//      AnalisisExploratorio.imprimeContribuyentes(Seq(Contribuyente(), Contribuyente()))
     }
   }) match {
     case Success(_) => if (fromFile(outputFileImprimeContribuyentes).getLines().forall(_ == responses.getString("imprimeDatos")))
@@ -156,6 +148,9 @@ object Scualador extends App {
 
   def parseDistribucion(d: Double): Double =
     BigDecimal(if (d < 1) d else d / 100).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
+
+  def getTypeTag[T: TypeTag](obj: T) = typeTag[T]
+
 
   logger.debug(s"totalDeRegistros: ${totalDeRegistros}")
   logger.debug(s"calculaEdadMedia: ${calculaEdadMedia}")
@@ -182,7 +177,7 @@ object Scualador extends App {
     ("imprimeContribuyentes" -> imprimeContribuyentes) ~
     ("nota" -> nota)
   )
-  val notasPW = new PrintWriter(new File(s"${scualador.getString("notas-dir")}/${scualador.getString("alumno")}"))
+  val notasPW = new PrintWriter(new File(s"${scualador.getString("notas-dir")}/${scualador.getString("alumno")}.json"))
   notasPW.write(compact(render(notas)))
   notasPW.close()
   logger.info(s"Nota Final: ${nota}")

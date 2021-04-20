@@ -4,3 +4,5 @@ target/*
 .idea/*
 .bsp/*
 **/**/target
+src/main/scala/com/ntic/to_check
+notas

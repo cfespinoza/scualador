@@ -30,9 +30,16 @@ for f in $(ls ${zip_files_dir}); do
     esac
 
     # Copiado trabajo
-    cp "${student_dir}/src/main/scala/AnalisisExploratorio.scala" "${cwd}/src/main/scala/ntic/to_check/"
-    cp "${student_dir}/src/main/scala/Analizador.scala" "${cwd}/src/main/scala/ntic/to_check/"
-    cp "${student_dir}/src/main/scala/Contribuyente.scala" "${cwd}/src/main/scala/ntic/to_check/"
+    cd "${student_dir}"
+    analisis_exploratorio_path=$(find -name AnalisisExploratorio.scala)
+    analizdor_path=$(find -name Analizador.scala)
+    contribuyente_path=$(find -name Contribuyente.scala)
+    cd ${cwd}
+
+    sed '1 s/^/package com\.ntic\.to_check\n/' "${student_dir}/${analisis_exploratorio_path}" > "${cwd}/src/main/scala/com/ntic/to_check/AnalisisExploratorio.scala"
+    sed '1 s/^/package com\.ntic\.to_check\n/' "${student_dir}/${analizdor_path}" > "${cwd}/src/main/scala/com/ntic/to_check/Analizador.scala"
+    sed '1 s/^/package com\.ntic\.to_check\n/' "${student_dir}/${contribuyente_path}" > "${cwd}/src/main/scala/com/ntic/to_check/Contribuyente.scala"
+
 
     export ALUMNO=${filename}
     export CURSO=${curso}
