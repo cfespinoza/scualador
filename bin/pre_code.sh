@@ -1,5 +1,6 @@
 #!/bin/bash
-
+START="$(date +%s)"
+source ~/Workspace/venvs/cflores/bin/activate
 # ./bin/pre_code.sh ~/Workspace/ntic/ntic_scala/tareas/masterdatascienceclase1_2020_2021 2020-2021 masterdatascienceclase1
 
 zip_files_dir=$1
@@ -11,8 +12,11 @@ mkdir "${decompressed_files}"
 
 cwd=$(pwd)
 export NOTAS_DIR="${cwd}/notas/${curso}/${grupo}"
+export LOGS_DIR="${cwd}/logs/${curso}/${grupo}"
 rm -rf "${NOTAS_DIR}"
+rm -rf "${LOGS_DIR}"
 mkdir -p "${NOTAS_DIR}"
+mkdir -p "${LOGS_DIR}"
 
 for f in $(ls ${zip_files_dir}); do
   filename=$(echo $f | cut -d "." -f 1)  # nombre_alumno
@@ -46,9 +50,12 @@ for f in $(ls ${zip_files_dir}); do
     export GRUPO=${grupo}
 
     sbt clean update
-    sbt package
-    sbt assembly
-    java -classpath "${cwd}/target/scala-2.11/${ALUMNO}-1.0.jar" com.caflores.Scualador
+    sbt package > "${LOGS_DIR}/${ALUMNO}.log"
+    sbt assembly >> "${LOGS_DIR}/${ALUMNO}.log"
+    java -classpath "${cwd}/target/scala-2.11/${ALUMNO}-1.0.jar" com.caflores.Scualador >> "${LOGS_DIR}/${ALUMNO}.log"
   fi
-
 done
+python "${cwd}/python/score_summarizer.py"
+END="$(date +%s)"
+DURATION=$[ ${END} - ${START} ]
+echo "Ejecucion en ${DURATION} segundos"

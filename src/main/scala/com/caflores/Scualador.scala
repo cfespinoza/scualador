@@ -1,17 +1,17 @@
 package com.caflores
 
-import com.ntic.to_check.{AnalisisExploratorio, Analizador, Contribuyente, Utilidades}
+import com.ntic.to_check.{AnalisisExploratorio, Contribuyente, Utilidades}
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.Logger
 import org.json4s.JsonAST.JObject
-import org.json4s.native.JsonMethods._
 import org.json4s.JsonDSL._
+import org.json4s.native.JsonMethods._
 import org.slf4j.LoggerFactory
 
 import java.io.{File, FileOutputStream, PrintStream, PrintWriter}
 import scala.io.Source.fromFile
-import scala.reflect.runtime.universe._
-import scala.reflect.runtime.universe.{typeOf, TypeTag, typeTag, TypeRef}
+import scala.language.experimental.macros
+import scala.reflect.runtime.universe.{TypeTag, typeOf, typeTag, _}
 import scala.util.{Failure, Success, Try}
 
 
@@ -128,9 +128,9 @@ object Scualador extends App {
     case Failure(exception) => 0
   }
   // Ejercicio 10
-  val analizador: Double = typeOf[AnalisisExploratorio.type] match {
-    case x: Analizador => 0.5
-    case x: App => 0
+  val tp = typeOf[AnalisisExploratorio.type]
+  val analizador: Double = tp.baseType(tp.baseClasses(1)).toString match {
+    case "com.ntic.to_check.Analizador" => 0.5
     case _ => 0
   }
   // Ejercicio 11
