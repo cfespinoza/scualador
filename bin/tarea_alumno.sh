@@ -2,7 +2,7 @@
 
 # ./bin/tarea_alumno.sh ~/Workspace/ntic/ntic_scala/tareas/masterdatascienceclase1_2020_2021 RequeniLizondoAndrea
 zip_files_dir=${1:?"Carpeta de tareas no establecido"}
-filename=${2:?"Nombre no establecido"}
+filename=${2:?"Nombre de alumn@ no establecido"}
 decompressed_files="${zip_files_dir}/descomprimidos"
 cwd=$(pwd)
 
