@@ -15,9 +15,9 @@ contribuyente_path=$(find -name Contribuyente.scala)
 cd ${cwd}
 
 
-sed '1 s/^/package com\.ntic\.to_check\n/' "${student_dir}/${analisis_exploratorio_path}" > "${cwd}/src/main/scala/com/ntic/to_check/AnalisisExploratorio.scala"
-sed '1 s/^/package com\.ntic\.to_check\n/' "${student_dir}/${analizdor_path}" > "${cwd}/src/main/scala/com/ntic/to_check/Analizador.scala"
-sed '1 s/^/package com\.ntic\.to_check\n/' "${student_dir}/${contribuyente_path}" > "${cwd}/src/main/scala/com/ntic/to_check/Contribuyente.scala"
+sed "1 s/^/package com\.ntic\.to_check \/\/${filename}\n/" "${student_dir}/${analisis_exploratorio_path}" > "${cwd}/src/main/scala/com/ntic/to_check/AnalisisExploratorio.scala"
+sed "1 s/^/package com\.ntic\.to_check \/\/${filename}\n/" "${student_dir}/${analizdor_path}" > "${cwd}/src/main/scala/com/ntic/to_check/Analizador.scala"
+sed "1 s/^/package com\.ntic\.to_check \/\/${filename}\n/" "${student_dir}/${contribuyente_path}" > "${cwd}/src/main/scala/com/ntic/to_check/Contribuyente.scala"
 
 
 
